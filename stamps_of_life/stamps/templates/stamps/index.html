@@ -1,0 +1,42 @@
+<style>
+    .button {
+        width: 64px;
+        height: 64px;
+    }
+</style>
+
+{% extends "stamps/base.html" %}
+{% block body %}
+<div class="container">
+    <div class="row text-center text-lg-left">
+    {% for stamp in stamp_list %}
+    <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
+        <form action="{% url 'stamps:count' stamp.name %}" method="post">
+            {% csrf_token %}
+            <input class="button btn btn-primary" type="submit" value="{{ stamp.count }}">
+            <p> {{ stamp.name }} </p>
+        </form>
+    </div>
+    {% endfor %}
+    <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
+        <input class="button btn btn-secondary" type="submit" value="+" onclick="popup( {{ stamp_list|length}} )">
+        <p> new button </p>
+    </div>
+  </div>
+</div>
+
+<script>
+function popup(counterNum) {
+    counterNum++;
+    var counterName = prompt("Please enter counter name", "mycounter" + counterNum);
+
+    if (counterName != null && counterName != "") {
+      window.location.href = '/stamps/add?query=' + counterName;
+    }
+
+}
+</script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+{% endblock %}

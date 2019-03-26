@@ -1,0 +1,41 @@
+
+{% extends "stamps/base.html" %}
+{% block body %}
+<div class="container">
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th scope="col-3">CName</th>
+          <th scope="col-7">Time</th>
+          <th scope="col-2">active</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for log in clog_list %}
+        {% if log.is_active %}
+        <tr>
+        {% else %}
+        <tr bgcolor="#eeeeee">
+        {% endif %}
+          <td> {{ log.stamp.name }} </td>
+          <td> {{ log.stamped_at }} </td>
+          <td>
+            {% if log.is_active %}
+            <form action="{% url 'stamps:offlog' log.id %}">
+                <input class="btn-sm" type="submit" value="ON">
+            </form>
+            {% else %}
+            <form action="{% url 'stamps:onlog' log.id %}">
+                <input class="btn-sm" type="submit" value="OFF">
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+</div>
+{% endblock %}
+
+
