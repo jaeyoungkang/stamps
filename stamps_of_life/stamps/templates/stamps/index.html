@@ -13,13 +13,13 @@
     <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
         <form action="{% url 'stamps:count' stamp.name %}" method="post">
             {% csrf_token %}
-            <input class="button btn btn-primary" type="submit" value="{{ stamp.count }}">
+            <input class="button btn-l btn-primary" type="submit" value="{{ stamp.count }}">
             <p> {{ stamp.name }} </p>
         </form>
     </div>
     {% endfor %}
     <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
-        <input class="button btn btn-secondary" type="submit" value="+" onclick="popup( {{ stamp_list|length}} )">
+        <input class="button btn-l btn-secondary" type="submit" value="+" onclick="popup( {{ stamp_list|length}} )">
         <p> new button </p>
     </div>
   </div>
