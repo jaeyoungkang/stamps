@@ -6,14 +6,22 @@ from .models import Stamp, CLog
 def get_stamp_all():
     return Stamp.objects.exclude(tag="trash").order_by('-created_at').all()
 
+def get_trash_all():
+    return Stamp.objects.filter(tag="trash").order_by('-created_at').all()
+
 def get_clog_all():
     return CLog.objects.exclude(stamp__tag="trash").order_by('-stamped_at').all()
 
+class TrashView(generic.ListView):
+    template_name = 'stamps/trash.html'
+    context_object_name = 'stamp_list'
+
+    def get_queryset(self):
+        return get_trash_all()
 
 class IndexView(generic.ListView):
     template_name = 'stamps/index.html'
     context_object_name = 'stamp_list'
-
 
     def get_queryset(self):
         return get_stamp_all()
@@ -61,10 +69,19 @@ def add_button(request):
 def edit(request):
     return render(request, 'stamps/edit.html', {'stamp_list': get_stamp_all()})
 
-def trash(request):
-    stamp_name = request.GET['query']
+def discard(request, stamp_name):
     s = Stamp.objects.filter(name=stamp_name).get()
     if s:
         s.tag = "trash"
         s.save()
     return render(request, 'stamps/edit.html', {'stamp_list': get_stamp_all()})
+
+def empty_trash(request):
+    Stamp.objects.filter(tag="trash").delete()
+    return render(request, 'stamps/trash.html', {'stamp_list': get_trash_all()})
+
+def restore(request, stamp_name):
+    s = Stamp.objects.get(name=stamp_name)
+    s.tag = 'normal'
+    s.save()
+    return render(request, 'stamps/trash.html', {'stamp_list': get_trash_all()})

@@ -11,31 +11,38 @@
 <div class="container">
     <div class="row text-center text-lg-left">
         <div class="col-lg-2 col-md-2 col-sm-2 mb-2 col-xs-2">
-            <input class="btn-warning btn-lg" type="submit" value="Count Mode" onclick="enableCountMode()">
+        <input class="btn-warning btn-lg" type="submit" value="Empty trash!" onclick="popup()">
         </div>
     </div>
+
     <br>
 
     <div class="row text-center text-lg-left">
     {% for stamp in stamp_list %}
     <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
-        <input class="button btn-warning" type="submit" value="{{ stamp.count }}" onclick="popup('{{ stamp.name }}')">
+        <input class="button btn-primary" type="submit" value="{{ stamp.count }}" onclick="restore_popup('{{stamp.name}}')">
         <p> {{ stamp.name }} </p>
     </div>
     {% endfor %}
+
   </div>
 </div>
 
 <script>
-function enableCountMode() {
-    window.location.href = '/stamps';
+function restore_popup(stamp_name) {
+    var p = confirm("Restore! " + stamp_name);
+
+    if(p == true) {
+        window.location.href = '/stamps/restore/' + stamp_name;
+    }
+
 }
 
-function popup(stampName) {
-    var r = confirm("Move to trash");
+function popup() {
+    var p = confirm("Empty Trash!");
 
-    if (r == true) {
-      window.location.href = '/stamps/discard/' + stampName;
+    if (p == true) {
+      window.location.href = '/stamps/empty';
     }
 
 }
