@@ -15,4 +15,6 @@ urlpatterns = [
     path('add', views.add_button, name='add'),
     path('api/', include(router.urls)),
     path('<stamp_name>/count', views.count, name='count'),
+    path('edit', views.edit, name='edit'),
+    path('trash', views.trash, name='trash'),
 ]

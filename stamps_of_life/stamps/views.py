@@ -4,15 +4,16 @@ from django.views import generic
 from .models import Stamp, CLog
 
 def get_stamp_all():
-    return Stamp.objects.order_by('-created_at').all()
+    return Stamp.objects.exclude(tag="trash").order_by('-created_at').all()
 
 def get_clog_all():
-    return CLog.objects.order_by('-stamped_at').all()
+    return CLog.objects.exclude(stamp__tag="trash").order_by('-stamped_at').all()
 
 
 class IndexView(generic.ListView):
     template_name = 'stamps/index.html'
     context_object_name = 'stamp_list'
+
 
     def get_queryset(self):
         return get_stamp_all()
@@ -27,7 +28,6 @@ class HistoryView(generic.ListView):
 def update_count(stamp):
     stamp.count = stamp.clog_set.filter(is_active=True).count();
     stamp.save()
-
 
 def count(request, stamp_name):
     s = get_object_or_404(Stamp, name=stamp_name)
@@ -57,3 +57,14 @@ def add_button(request):
     s = Stamp(name=stamp_name)
     s.save()
     return render(request, 'stamps/index.html', {'stamp_list': get_stamp_all()} )
+
+def edit(request):
+    return render(request, 'stamps/edit.html', {'stamp_list': get_stamp_all()})
+
+def trash(request):
+    stamp_name = request.GET['query']
+    s = Stamp.objects.filter(name=stamp_name).get()
+    if s:
+        s.tag = "trash"
+        s.save()
+    return render(request, 'stamps/edit.html', {'stamp_list': get_stamp_all()})
