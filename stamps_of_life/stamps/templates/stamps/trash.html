@@ -10,8 +10,8 @@
 {% block body %}
 <div class="container">
     <div class="row text-center text-lg-left">
-        <div class="col-lg-2 col-md-2 col-sm-2 mb-2 col-xs-2">
-        <input class="btn-warning btn-lg" type="submit" value="Empty trash!" onclick="popup()">
+        <div class="col">
+        <input class="btn-warning btn-lg" type="submit" value="Empty trash!" onclick="popup( '{% url 'stamps:empty' %}' )">
         </div>
     </div>
 
@@ -20,29 +20,52 @@
     <div class="row text-center text-lg-left">
     {% for stamp in stamp_list %}
     <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
-        <input class="button btn-primary" type="submit" value="{{ stamp.count }}" onclick="restore_popup('{{stamp.name}}')">
+        <input class="button btn-primary" type="submit" value="{{ stamp.count }}" onclick="restore_popup('{{stamp.name}}', '{% url 'stamps:restore' page_number stamp.id %}')">
         <p> {{ stamp.name }} </p>
     </div>
     {% endfor %}
-
   </div>
+
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+      <a class="page-link" href="#" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Previous</span>
+      </a>
+    </li>
+    {% for page_index in page_count %}
+    <li class="page-item">
+      {% if page_index == page_number %}
+      <a class="page-link active" href="{% url 'stamps:trash' page_index %}"> {{ page_index }}</a>
+      {% else %}
+      <a class="page-link" href="{% url 'stamps:trash' page_index %}"> {{ page_index }}</a>
+      {% endif %}
+    </li>
+    {% endfor %}
+    <li class="page-item">
+      <a class="page-link" href="#" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Next</span>
+          </a>
+    </li>
+  </ul>
 </div>
 
 <script>
-function restore_popup(stamp_name) {
+function restore_popup(stamp_name, url) {
     var p = confirm("Restore! " + stamp_name);
 
     if(p == true) {
-        window.location.href = '/stamps/restore/' + stamp_name;
+        window.location.href =  url;
     }
 
 }
 
-function popup() {
+function popup(url) {
     var p = confirm("Empty Trash!");
 
     if (p == true) {
-      window.location.href = '/stamps/empty';
+      window.location.href = url;
     }
 
 }

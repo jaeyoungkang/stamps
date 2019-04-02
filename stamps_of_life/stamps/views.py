@@ -1,7 +1,17 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 
 from .models import Stamp, CLog
+
+MAX_COUNT = 12
+
+def get_stamp_page(index, stamps):
+    start_index = MAX_COUNT * (index-1)
+    end_index = start_index  + MAX_COUNT
+    if stamps.count() <= end_index:
+        return stamps[start_index:]
+    else:
+        return stamps[start_index:end_index]
 
 def get_stamp_all():
     return Stamp.objects.exclude(tag="trash").order_by('-created_at').all()
@@ -12,19 +22,45 @@ def get_trash_all():
 def get_clog_all():
     return CLog.objects.exclude(stamp__tag="trash").order_by('-stamped_at').all()
 
+def make_page_index(stamps):
+    total_count = stamps.count()
+
+    if total_count <= MAX_COUNT:
+        page_count = 2
+    else:
+        page_count = int(total_count / MAX_COUNT) + 1
+        if total_count % MAX_COUNT > 0:
+            page_count += 1
+    return page_count
+
 class TrashView(generic.ListView):
     template_name = 'stamps/trash.html'
     context_object_name = 'stamp_list'
 
-    def get_queryset(self):
-        return get_trash_all()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_count'] = range(1, make_page_index(get_trash_all()))
+        context['page_number'] = int(self.kwargs['page_index'])
+        return context
 
-class IndexView(generic.ListView):
+    def get_queryset(self):
+        page_number = int(self.kwargs['page_index'])
+        return get_stamp_page(page_number, get_trash_all())
+
+class MainView(generic.ListView):
     template_name = 'stamps/index.html'
     context_object_name = 'stamp_list'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_count'] = range(1, make_page_index(get_stamp_all()))
+        context['page_number'] = int(self.kwargs['page_index'])
+        return context
+
     def get_queryset(self):
-        return get_stamp_all()
+        page_number = int(self.kwargs['page_index'])
+        return get_stamp_page(page_number, get_stamp_all())
+
 
 class HistoryView(generic.ListView):
     template_name = 'stamps/history.html'
@@ -37,51 +73,64 @@ def update_count(stamp):
     stamp.count = stamp.clog_set.filter(is_active=True).count();
     stamp.save()
 
-def count(request, stamp_name):
-    s = get_object_or_404(Stamp, name=stamp_name)
+def count(request, page_number, stamp_id):
+    s = get_object_or_404(Stamp, id=stamp_id)
     s.clog_set.create()
     update_count(s)
-    return render(request, 'stamps/index.html', {'stamp_list': get_stamp_all()} )
+    return redirect('stamps:main', page_number)
 
 def on_clog(request, clog_id):
     clog = get_object_or_404(CLog, id=clog_id)
     clog.is_active = True;
     clog.save()
     update_count(clog.stamp)
-    return render(request, 'stamps/history.html', {'clog_list':get_clog_all()} )
+    return redirect('stamps:history')
 
 def off_clog(request, clog_id):
     clog = get_object_or_404(CLog, id=clog_id)
     clog.is_active = False;
     clog.save()
     update_count(clog.stamp)
-    return render(request, 'stamps/history.html', {'clog_list':get_clog_all()} )
+    return redirect('stamps:history')
 
 
 def add_button(request):
     stamp_name = request.GET['query']
+    page_number = request.GET['page_number']
     if Stamp.objects.filter(name=stamp_name).exists():
-        return render(request, 'stamps/index.html', {'stamp_list': get_stamp_all()} )
+        return redirect('stamps:main', page_number)
     s = Stamp(name=stamp_name)
     s.save()
-    return render(request, 'stamps/index.html', {'stamp_list': get_stamp_all()} )
+    return redirect('stamps:main', page_number)
 
-def edit(request):
-    return render(request, 'stamps/edit.html', {'stamp_list': get_stamp_all()})
+class EditView(generic.ListView):
+    template_name = 'stamps/edit.html'
+    context_object_name = 'stamp_list'
 
-def discard(request, stamp_name):
-    s = Stamp.objects.filter(name=stamp_name).get()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_count'] = range(1, make_page_index(get_stamp_all()))
+        context['page_number'] = int(self.kwargs['page_index'])
+        return context
+
+    def get_queryset(self):
+        page_number = int(self.kwargs['page_index'])
+        return get_stamp_page(page_number, get_stamp_all())
+
+
+def discard(request, page_number, stamp_id):
+    s = Stamp.objects.filter(id=stamp_id).get()
     if s:
         s.tag = "trash"
         s.save()
-    return render(request, 'stamps/edit.html', {'stamp_list': get_stamp_all()})
+    return redirect('stamps:edit', page_number)
 
 def empty_trash(request):
     Stamp.objects.filter(tag="trash").delete()
-    return render(request, 'stamps/trash.html', {'stamp_list': get_trash_all()})
+    return redirect('stamps:trash', 1)
 
-def restore(request, stamp_name):
-    s = Stamp.objects.get(name=stamp_name)
+def restore(request, page_number, stamp_id):
+    s = Stamp.objects.get(id=stamp_id)
     s.tag = 'normal'
     s.save()
-    return render(request, 'stamps/trash.html', {'stamp_list': get_trash_all()})
+    return redirect('stamps:trash', page_number)
