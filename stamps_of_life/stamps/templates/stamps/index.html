@@ -22,7 +22,7 @@
     <div class="row text-center text-lg-left">
     {% for stamp in stamp_list %}
     <div class="col-lg-2 col-md-4 col-sm-4 mb-4 col-xs-4">
-        <input class="button btn-primary" type="submit" value="{{ stamp.count }}"b onclick="count('{% url 'stamps:count' page_number stamp.id  %}')">
+        <input class="btn-primary btn-lg" style="text-align:center; font-size :24px; width:80px; height:80px" type="button" value="{{ stamp.count }}"b onclick="count('{% url 'stamps:count' page_number stamp.id  %}')">
         <p> {{ stamp.name }} </p>
     </div>
     {% endfor %}
