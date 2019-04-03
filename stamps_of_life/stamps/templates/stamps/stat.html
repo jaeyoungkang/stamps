@@ -1,0 +1,38 @@
+
+{% extends "stamps/base.html" %}
+{% block body %}
+<div>
+    <input class="btn-primary" type="submit" value="오늘" onclick="setRange('{% url 'stamps:stat' 1 %}')">
+    <input class="btn-primary" type="submit" value="일주일" onclick="setRange('{% url 'stamps:stat' 7 %}')">
+    <a> {{start_day}} - {{end_day}} </a>
+</div>
+<div class="container">
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th scope="col-6">Counter</th>
+          <th scope="col-3">Times</th>
+          <th scope="col-3">Rate</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for d in stats %}
+      <tr>
+          <td> {{ d.name }} </td>
+          <td> {{ d.count }} </td>
+          <td> {{ d.rate }} % </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+</div>
+
+<script>
+    function setRange(url) {
+        window.location.href = url;
+    }
+</script>
+{% endblock %}
+
+

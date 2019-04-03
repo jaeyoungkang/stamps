@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
-import datetime
+from datetime import datetime, timedelta
 
 from .models import Stamp, CLog
 
@@ -70,9 +70,46 @@ class HistoryView(generic.ListView):
     def get_queryset(self):
         return get_clog_all()
 
+def make_range(period):
+    today = datetime.now() + timedelta(days=1)
+    startday = today - timedelta(days=period)
+
+    start = startday.strftime("%Y-%m-%d")
+    end = today.strftime("%Y-%m-%d")
+    return [start, end]
+
+
+class StatView(generic.ListView):
+    template_name = 'stamps/stat.html'
+    context_object_name = 'stats'
+
+    def get_context_data(self, **kwargs):
+        period = int(self.kwargs['period'])
+        range = make_range(period)
+
+        context = super().get_context_data(**kwargs)
+        context['start_day'] = range[0]
+        context['end_day'] = range[1]
+        return context
+
+    def get_queryset(self):
+        period = int(self.kwargs['period'])
+        range = make_range(period)
+
+        logs = CLog.objects.filter(stamped_at__range=range).filter(is_active=True).all()
+        names = logs.values("stamp__name").distinct()
+        total_count = logs.count()
+        result = []
+        for name in names:
+            n = name['stamp__name']
+            c = logs.filter(stamp__name=n).count()
+            r = round(c/total_count * 100, 1)
+            result.append({"name": n, "count": c, "rate":r})
+        return result
+
 def update_count(stamp):
     stamp.count = stamp.clog_set.filter(is_active=True).count();
-    stamp.updated_at = datetime.datetime.now()
+    stamp.updated_at = datetime.now()
     stamp.save()
 
 def count(request, page_number, stamp_id):

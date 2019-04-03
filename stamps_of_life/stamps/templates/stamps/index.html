@@ -6,15 +6,12 @@
     <div class="row text-center text-lg-left">
         <div class="col">
             <input class="btn-warning btn-lg" type="submit" value="delete" onclick="enableEditMode( {{page_number}})">
-            <p> delete mode </p>
         </div>
         <div class="col">
             <input class="btn-primary btn-lg" type="submit" value="Search" onclick="search('{% url 'stamps:search' %}')">
-            <p> Search counter </p>
         </div>
         <div class="col">
-            <input class="btn-primary btn-lg" type="submit" value=" + " onclick="popup( {{ stamp_list|length}}, {{page_number}} )">
-            <p> new button </p>
+            <input class="btn-primary btn-lg" type="submit" value="new" onclick="popup( {{ stamp_list|length}}, {{page_number}} )">
         </div>
     </div>
     <br>
