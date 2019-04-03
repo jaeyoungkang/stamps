@@ -184,5 +184,5 @@ def search(request):
 
 def filter(request):
     keyword = request.GET['query']
-    logs = CLog.objects.filter(stamp__name__contains=keyword).all()
+    logs = CLog.objects.filter(stamp__name__contains=keyword).order_by('-stamped_at').all()
     return render(request, "stamps/history.html", {"clog_list":logs})
