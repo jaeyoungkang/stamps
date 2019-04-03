@@ -25,5 +25,7 @@ urlpatterns = [
 
     path('empty', views.empty_trash, name='empty'),
 
-    path('search/', views.search, name='search'),
+    path('search', views.search, name='search'),
+
+    path('filter', views.filter, name='filter'),
 ]

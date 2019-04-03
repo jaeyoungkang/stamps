@@ -1,6 +1,14 @@
 
 {% extends "stamps/base.html" %}
 {% block body %}
+<div>
+    <div class="input-group mb-3">
+    <input id="filtering_keyword" type="text" class="form-control" placeholder="CounterName">
+    <div class="input-group-append">
+    <span class="input-group-text"onclick="setFilter('{% url 'stamps:filter' %}')">Filtering</span>
+  </div>
+</div>
+
 <div class="container">
     <table class="table table-sm table-hover">
       <thead>
@@ -34,8 +42,14 @@
       {% endfor %}
       </tbody>
     </table>
-
 </div>
+
+<script>
+  function setFilter(url) {
+    window.location.href = url + "?query=" + document.getElementById("filtering_keyword").value
+  }
+
+</script>
 {% endblock %}
 
 

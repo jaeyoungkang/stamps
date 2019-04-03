@@ -181,3 +181,8 @@ def search(request):
     keyword = request.GET['query']
     stamps = Stamp.objects.exclude(tag='trash').filter(name__contains=keyword).all()
     return render(request, "stamps/search.html", {"stamp_list":stamps})
+
+def filter(request):
+    keyword = request.GET['query']
+    logs = CLog.objects.filter(stamp__name__contains=keyword).all()
+    return render(request, "stamps/history.html", {"clog_list":logs})
