@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 from datetime import datetime, timedelta
+import operator
 
 from .models import Stamp, CLog
 
@@ -105,6 +106,8 @@ class StatView(generic.ListView):
             c = logs.filter(stamp__name=n).count()
             r = round(c/total_count * 100, 1)
             result.append({"name": n, "count": c, "rate":r})
+
+        result.sort(key=operator.itemgetter('count'), reverse=True)
         return result
 
 def update_count(stamp):
