@@ -134,3 +134,8 @@ def restore(request, page_number, stamp_id):
     s.tag = 'normal'
     s.save()
     return redirect('stamps:trash', page_number)
+
+def search(request):
+    keyword = request.GET['query']
+    stamps = Stamp.objects.exclude(tag='trash').filter(name__contains=keyword).all()
+    return render(request, "stamps/search.html", {"stamp_list":stamps})

@@ -9,7 +9,7 @@
             <p> delete mode </p>
         </div>
         <div class="col">
-            <input class="btn-primary btn-lg" type="submit" value="Search" onclick="enableEditMode( {{page_number}})">
+            <input class="btn-primary btn-lg" type="submit" value="Search" onclick="search('{% url 'stamps:search' %}')">
             <p> Search counter </p>
         </div>
         <div class="col">
@@ -56,6 +56,15 @@
 </div>
 
 <script>
+
+function search(url) {
+    console.log(url)
+    var keyword = prompt("Type keyword", "")
+
+    if(keyword != null && keyword != "") {
+        window.location.href = url + "?query=" + keyword;
+    }
+}
 
 function count(url) {
   window.location.href = url;

@@ -23,4 +23,6 @@ urlpatterns = [
     path('restore/<page_number>/<stamp_id>', views.restore, name='restore'),
 
     path('empty', views.empty_trash, name='empty'),
+
+    path('search/', views.search, name='search'),
 ]
