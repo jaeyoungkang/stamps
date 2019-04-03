@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
+import datetime
 
 from .models import Stamp, CLog
 
@@ -71,6 +72,7 @@ class HistoryView(generic.ListView):
 
 def update_count(stamp):
     stamp.count = stamp.clog_set.filter(is_active=True).count();
+    stamp.updated_at = datetime.datetime.now()
     stamp.save()
 
 def count(request, page_number, stamp_id):
