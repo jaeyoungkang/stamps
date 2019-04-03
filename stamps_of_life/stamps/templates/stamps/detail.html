@@ -1,7 +1,0 @@
-<h1>{{ stamp.name }}</h1>
-
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-{% for log in stamp.board_set.all %}
-    <label >{{ log.stamped_at }}</label><br>
-{% endfor %}
