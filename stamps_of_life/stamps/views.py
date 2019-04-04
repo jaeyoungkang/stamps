@@ -33,7 +33,13 @@ class MainView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_count'] = range(1, Board.objects.count())
+        board_count =  Board.objects.count()
+        if board_count == 0 :
+            b = Board(name="1")
+            b.save()
+            board_count = Board.objects.count()
+
+        context['page_count'] = range(1, board_count)
         context['page_number'] = int(self.kwargs['page_index'])
         return context
 
@@ -119,6 +125,7 @@ def add_counter(request):
     if Stamp.objects.filter(name=stamp_name).exists():
         return redirect('stamps:main', page_number)
     s = Stamp(name=stamp_name)
+    s.board = Board.objects.get(name="1")
     s.save()
     return redirect('stamps:main', page_number)
 
