@@ -135,8 +135,7 @@ def off_clog(request, clog_id):
     update_count(clog.stamp)
     return redirect('stamps:history')
 
-
-def add_button(request):
+def add_counter(request):
     stamp_name = request.GET['query']
     page_number = request.GET['page_number']
     if Stamp.objects.filter(name=stamp_name).exists():

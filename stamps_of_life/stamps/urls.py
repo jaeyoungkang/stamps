@@ -16,7 +16,7 @@ urlpatterns = [
 
     path('<clog_id>/onlog', views.on_clog, name='onlog'),
     path('<clog_id>/offlog', views.off_clog, name='offlog'),
-    path('add', views.add_button, name='add'),
+    path('add', views.add_counter, name='add'),
     path('api/', include(router.urls)),
 
     path('count/<page_number>/<stamp_id>', views.count, name='count'),
