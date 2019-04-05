@@ -4,6 +4,7 @@
 <div>
     <input class="btn-primary" type="submit" value="오늘" onclick="setRange('{% url 'stamps:stat' 1 %}')">
     <input class="btn-primary" type="submit" value="일주일" onclick="setRange('{% url 'stamps:stat' 7 %}')">
+    <input class="btn-primary" type="submit" value="4주" onclick="setRange('{% url 'stamps:stat' 28 %}')">
     <a> {{start_day}} - {{end_day}} </a>
 </div>
 <div class="container">
