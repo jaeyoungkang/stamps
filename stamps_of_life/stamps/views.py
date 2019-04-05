@@ -105,11 +105,11 @@ def update_count(stamp):
     stamp.updated_at = datetime.now()
     stamp.save()
 
-def count(request, baord_name, stamp_id):
+def count(request, stamp_id, board_name):
     s = get_object_or_404(Stamp, id=stamp_id)
     s.clog_set.create()
     update_count(s)
-    return redirect('stamps:main', baord_name)
+    return redirect('stamps:main', board_name)
 
 def on_clog(request, clog_id):
     clog = get_object_or_404(CLog, id=clog_id)
