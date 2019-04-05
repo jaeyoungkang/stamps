@@ -6,7 +6,7 @@ import operator
 from .models import Stamp, CLog, Board
 
 def get_stamp_all(board_name):
-    return Stamp.objects.filter(board__name=board_name).order_by('-created_at').all()
+    return Stamp.objects.filter(board__name=board_name).order_by('-updated_at').all()
 
 def get_trash_all():
     if Board.objects.filter(name="trash").exists() != True:
