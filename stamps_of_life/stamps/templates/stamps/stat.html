@@ -2,9 +2,16 @@
 {% extends "stamps/base.html" %}
 {% block body %}
 <div>
-    <input class="btn-primary" type="submit" value="오늘" onclick="setRange('{% url 'stamps:stat' 1 %}')">
-    <input class="btn-primary" type="submit" value="일주일" onclick="setRange('{% url 'stamps:stat' 7 %}')">
-    <input class="btn-primary" type="submit" value="4주" onclick="setRange('{% url 'stamps:stat' 28 %}')">
+    <input class="btn-primary" type="submit" value="오늘" onclick="setRange('{% url 'stamps:stat' %}', 1)">
+    <input class="btn-primary" type="submit" value="일주일" onclick="setRange('{% url 'stamps:stat' %}', 7)">
+    <input class="btn-primary" type="submit" value="4주" onclick="setRange('{% url 'stamps:stat' %}', 28)">
+    {% if type == 'group' %}
+    <input type="checkbox" id="group" onclick="setRange('{% url 'stamps:stat' %}', {{period}})" checked>
+    {% else %}
+    <input type="checkbox" id="group" onclick="setRange('{% url 'stamps:stat' %}', {{period}})">
+    {% endif %}
+    <label class="label">Show Groups</label>
+    <br>
     <a> {{start_day}} - {{end_day}} </a>
 </div>
 <div class="container">
@@ -30,8 +37,14 @@
 </div>
 
 <script>
-    function setRange(url) {
-        window.location.href = url;
+    function setRange(url, range) {
+        var checkBox = document.getElementById("group");
+        var type = "group"
+        if (checkBox.checked == false){
+            type = "individual"
+        }
+
+        window.location.href = url + "?type=" + type + "&period=" + range;
     }
 </script>
 {% endblock %}

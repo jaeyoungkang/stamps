@@ -11,7 +11,7 @@ urlpatterns = [
     path('main/<board_name>', views.MainView.as_view(), name='main'),
     path('edit/<board_name>', views.EditView.as_view(), name='edit'),
     path('history', views.HistoryView.as_view(), name='history'),
-    path('stat/<period>', views.StatView.as_view(), name='stat'),
+    path('stat', views.StatView.as_view(), name='stat'),
 
     path('<clog_id>/onlog', views.on_clog, name='onlog'),
     path('<clog_id>/offlog', views.off_clog, name='offlog'),

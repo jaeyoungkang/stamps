@@ -78,27 +78,40 @@ class StatView(generic.ListView):
     context_object_name = 'stats'
 
     def get_context_data(self, **kwargs):
-        period = int(self.kwargs['period'])
+        period = int(self.request.GET['period'])
+        type = self.request.GET['type']
         range = make_range(period)
 
         context = super().get_context_data(**kwargs)
         context['start_day'] = range[0]
         context['end_day'] = range[1]
+        context['period'] = period
+        context['type'] = type
         return context
 
     def get_queryset(self):
-        period = int(self.kwargs['period'])
+        period = int(self.request.GET['period'])
         range = make_range(period)
 
         logs = CLog.objects.filter(stamped_at__range=range).filter(is_active=True).all()
-        names = logs.values("stamp__name").distinct()
         total_count = logs.count()
         result = []
-        for name in names:
-            n = name['stamp__name']
-            c = logs.filter(stamp__name=n).count()
-            r = round(c/total_count * 100, 1)
-            result.append({"name": n, "count": c, "rate":r})
+
+        type = self.request.GET['type']
+        if  type == "group":
+            board_names = logs.values("stamp__board__name").distinct()
+            for name in board_names:
+                n = name['stamp__board__name']
+                c = logs.filter(stamp__board__name=n).count()
+                r = round(c/total_count * 100, 1)
+                result.append({"name": n, "count": c, "rate":r})
+        else:
+            names = logs.values("stamp__name").distinct()
+            for name in names:
+                n = name['stamp__name']
+                c = logs.filter(stamp__name=n).count()
+                r = round(c/total_count * 100, 1)
+                result.append({"name": n, "count": c, "rate":r})
 
         result.sort(key=operator.itemgetter('count'), reverse=True)
         return result
