@@ -18,9 +18,13 @@
     <table class="table table-sm table-hover">
       <thead>
         <tr>
-          <th scope="col-6">Counter</th>
-          <th scope="col-3">Times</th>
-          <th scope="col-3">Rate</th>
+            {% if type == 'group' %}
+            <th scope="col-6">Group</th>
+            {% else %}
+            <th scope="col-6">Counter</th>
+            {% endif %}
+            <th scope="col-3">Times</th>
+            <th scope="col-3">Rate</th>
         </tr>
       </thead>
 
