@@ -16,11 +16,17 @@ def get_trash_all():
         trash = Board.objects.filter(name="trash").get()
     return trash.stamp_set.all() # remove order
 
-def get_clog_all(length):
-    count = CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').count()
+def get_clog_list(length, keyword):
+    log_list = CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').all()
+
+    if keyword != "":
+        log_list = log_list.filter(stamp__name__contains=keyword)
+
+    count = log_list.count()
     if count < length:
         length = count
-    return CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').all()[:length]
+
+    return log_list[:length]
 
 class MainView(generic.ListView):
     template_name = 'stamps/index.html'
@@ -62,7 +68,7 @@ class HistoryView(generic.ListView):
     context_object_name = 'clog_list'
 
     def get_queryset(self):
-        return get_clog_all(100)
+        return get_clog_list(100, "")
 
 def make_range(period):
     today = datetime.now() + timedelta(days=1)
@@ -194,7 +200,7 @@ def search(request):
 
 def filter(request):
     keyword = request.GET['query']
-    logs = CLog.objects.filter(stamp__name__contains=keyword).order_by('-stamped_at').all()
+    logs = get_clog_list(100, keyword)
     return render(request, "stamps/history.html", {"clog_list":logs})
 
 def move(request):
