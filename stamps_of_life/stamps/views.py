@@ -16,8 +16,11 @@ def get_trash_all():
         trash = Board.objects.filter(name="trash").get()
     return trash.stamp_set.all() # remove order
 
-def get_clog_all():
-    return CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').all()
+def get_clog_all(length):
+    count = CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').count()
+    if count < length:
+        length = count
+    return CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').all()[:length]
 
 class MainView(generic.ListView):
     template_name = 'stamps/index.html'
@@ -59,7 +62,7 @@ class HistoryView(generic.ListView):
     context_object_name = 'clog_list'
 
     def get_queryset(self):
-        return get_clog_all()
+        return get_clog_all(100)
 
 def make_range(period):
     today = datetime.now() + timedelta(days=1)
