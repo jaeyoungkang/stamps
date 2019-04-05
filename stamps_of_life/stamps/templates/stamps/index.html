@@ -1,73 +1,107 @@
-
-
 {% extends "stamps/base.html" %}
+{% load static %}
 {% block body %}
+<div class="row text-center">
+  <div class="col-xs-2">
+        <input class="btn" type="button" value="edit" onclick="enableEditMode('{{board_name}}')" >
+  </div>
+  <div class="col-xs-7">
+        <input id="filtering_keyword" type="text" class="form-control" placeholder="keyword">
+  </div>
+  <div class="col-xs-2">
+        <input class="btn" type="button" value="search" onclick="search('{% url 'stamps:search' %}')"  >
+  </div>
+</div>
+<br>
+<div class="row text-center">
+    <div class="col">
+    <input class="btn-secondary btn-sm" type="button" value="-" onclick="removeBoard('{% url 'stamps:remove_board' %}')">
+    {% for board in board_list %}
+        {% if board.name == board_name %}
+        <input class="btn-primary btn-sm" type="button" value="{{ board.name }}" onclick="changeBoard('{% url 'stamps:main' board.name %}')">
+        {% else %}
+        <input class="btn-secondary btn-sm" type="button" value="{{ board.name }}" onclick="changeBoard('{% url 'stamps:main' board.name %}')">
+        {% endif %}
+    {% endfor %}
+    <input class="btn-secondary btn-sm" type="button" value="+" onclick="makeBoard('{% url 'stamps:make_board' %}')">
+    </div>
+</div>
+<br>
 <div class="container">
-    <div class="row text-center text-lg-left">
-        <div class="col">
-            <input class="btn-warning btn-lg" type="submit" value="delete" onclick="enableEditMode( {{page_number}})">
+    <div class="row text-center">
+        {% if board_name != "trash" %}
+        <div class="col-lg-2 col-md-4 col-sm-4 mb-4 col-xs-4">
+            <input class="button btn-secondary btn-lg" type="submit" value="+"b onclick="popup( {{ stamp_list|length}}, '{{board_name}}' )">
+            <p> New Counter </p>
         </div>
-        <div class="col">
-            <input class="btn-primary btn-lg" type="submit" value="Search" onclick="search('{% url 'stamps:search' %}')">
+        {% endif %}
+        {% for stamp in stamp_list %}
+        <div class="col-lg-2 col-md-4 col-sm-4 mb-4 col-xs-4">
+            {% if board_name != "trash" %}
+            <input class="button btn-primary btn-lg" type="submit" value="{{ stamp.count }}" onclick="count('{% url 'stamps:count' board_name stamp.id  %}')">
+            {% else %}
+            <input class="button btn-secondary btn-lg" type="submit" value="{{ stamp.count }}" onclick="remove('{% url 'stamps:remove' stamp.id  %}')">
+            {% endif %}
+            <p> {{ stamp.name }} </p>
         </div>
-        <div class="col">
-            <input class="btn-primary btn-lg" type="submit" value="new" onclick="popup( {{ stamp_list|length}}, {{page_number}} )">
-        </div>
+    {% endfor %}
     </div>
     <br>
-
-    <div class="row text-center text-lg-left">
-    {% for stamp in stamp_list %}
-    <div class="col-lg-2 col-md-4 col-sm-4 mb-4 col-xs-4">
-        <input class="button btn-primary btn-lg" type="submit" value="{{ stamp.count }}"b onclick="count('{% url 'stamps:count' page_number stamp.id  %}')">
-        <p> {{ stamp.name }} </p>
-    </div>
-    {% endfor %}
-
-  </div>
-
- <!-- Pagination -->
-  <ul class="pagination justify-content-center">
-    {% for page_index in page_count %}
-        {% if page_index == page_number %}
-        <li class="page-item active">
-        {% else %}
-        <li class="page-item">
-        {% endif %}
-            <a class="page-link" href="{% url 'stamps:main' page_index %}"> {{ page_index }}</a>
-        </li>
-    {% endfor %}
-  </ul>
 </div>
-
 <script>
+    function changeBoard(url) {
+    window.location.href = url;
+}
 
-function search(url) {
-    console.log(url)
-    var keyword = prompt("Type keyword", "")
+function removeBoard(url) {
+    var keyword = prompt("Type board name", "")
 
     if(keyword != null && keyword != "") {
         window.location.href = url + "?query=" + keyword;
     }
 }
 
+function makeBoard(url) {
+    var keyword = prompt("Type board name", "")
+
+    if(keyword != null && keyword != "") {
+        window.location.href = url + "?query=" + keyword;
+    }
+}
+
+function search(url) {
+    var keyword = document.getElementById("filtering_keyword").value
+
+    if(keyword != null && keyword != "") {
+        window.location.href = url + "?query=" + keyword;
+    }
+}
+
+function remove(url) {
+    var r = confirm("Are you sure to remove");
+    if (r==true) {
+        window.location.href = url;
+    }
+}
+
 function count(url) {
-  window.location.href = url;
+    window.location.href = url;
 }
 
-function enableEditMode(page_number) {
-    window.location.href = '/stamps/edit/' + page_number;
+function enableEditMode(board_name) {
+    window.location.href = '/stamps/edit/' + board_name;
 }
 
-function popup(counterNum, page_number) {
+function popup(counterNum, board_name) {
     counterNum++;
     var counterName = prompt("Please enter counter name", "mycounter" + counterNum);
 
     if (counterName != null && counterName != "") {
-      window.location.href = '/stamps/add?query=' + counterName + "&page_number=" + page_number;
+      window.location.href = '/stamps/add?query=' + counterName + "&board_name=" + board_name;
     }
 }
 </script>
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>

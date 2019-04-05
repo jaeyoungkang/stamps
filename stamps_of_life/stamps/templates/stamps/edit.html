@@ -1,48 +1,82 @@
 {% extends "stamps/base.html" %}
 {% block body %}
-<div class="container">
-    <div class="row text-center text-lg-left">
-        <div class="col">
-            <input class="btn-warning btn-lg" type="submit" value="Count Mode" onclick="enableCountMode( '{% url 'stamps:main' page_number %}' )">
-        </div>
+<div class="row text-center">
+  <div class="col-xs-2">
+        <input class="btn" type="button" value="edit" onclick="enableCountMode('{% url 'stamps:main' board_name %}')" >
+  </div>
+  <div class="col-xs-7">
+        <input id="filtering_keyword" type="text" class="form-control" placeholder="keyword">
+  </div>
+  <div class="col-xs-2">
+        <input class="btn" type="button" value="search" onclick="search('{% url 'stamps:search' %}')"  >
+  </div>
+</div>
+<br>
+<div class="row text-center">
+    <div class="col">
+    <input class="btn-secondary btn-sm" type="button" value="-" onclick="removeBoard('{% url 'stamps:remove_board' %}')">
+    {% for board in board_list %}
+        {% if board.name == board_name %}
+        <input class="btn-primary btn-sm" type="button" value="{{ board.name }}" onclick="changeBoard('{% url 'stamps:edit' board.name %}')">
+        {% else %}
+        <input class="btn-secondary btn-sm" type="button" value="{{ board.name }}" onclick="changeBoard('{% url 'stamps:edit' board.name %}')">
+        {% endif %}
+    {% endfor %}
+    <input class="btn-secondary btn-sm" type="button" value="+" onclick="makeBoard('{% url 'stamps:make_board' %}')">
     </div>
-    <br>
+</div>
+<br>
 
-    <div class="row text-center text-lg-left">
+<div class="container">
+    <div class="row text-center">
     {% for stamp in stamp_list %}
     <div class="col-lg-2 col-md-2 col-sm-3 mb-4 col-xs-4">
-        <input class="button btn-warning" type="submit" value="{{ stamp.count }}" onclick="popup('{{ stamp.name }}' , '{% url 'stamps:discard' page_number stamp.id %}')">
+        <input class="button btn-warning" type="submit" value="{{ stamp.count }}" onclick="move('{{ stamp.id }}')">
         <p> {{ stamp.name }} </p>
     </div>
     {% endfor %}
   </div>
-
-    <!-- Pagination -->
-  <ul class="pagination justify-content-center">
-    {% for page_index in page_count %}
-        {% if page_index == page_number %}
-        <li class="page-item active">
-        {% else %}
-        <li class="page-item">
-        {% endif %}
-          <a class="page-link" href="{% url 'stamps:edit' page_index %}"> {{ page_index }}</a>
-        </li>
-    {% endfor %}
-  </ul>
 </div>
 
 <script>
-function enableCountMode(url) {
+function changeBoard(url) {
     window.location.href = url;
 }
 
-function popup(stampName, url) {
-    var r = confirm("Move to trash");
+function removeBoard(url) {
+    var keyword = prompt("Type board name", "")
 
-    if (r == true) {
-      window.location.href = url;
+    if(keyword != null && keyword != "") {
+        window.location.href = url + "?query=" + keyword;
     }
+}
 
+function makeBoard(url) {
+    var keyword = prompt("Type board name", "")
+
+    if(keyword != null && keyword != "") {
+        window.location.href = url + "?query=" + keyword;
+    }
+}
+
+function move(stampId) {
+    var board_list = [
+    {% for board in board_list %}
+        '{{ board.name }}',
+    {% endfor %}
+    ];
+
+    var boardName = prompt("Enter the board name to move", "" );
+    var found = board_list.includes(boardName);
+
+
+    if (found && boardName != null && boardName != "") {
+        window.location.href = '{% url 'stamps:move' %}' + "?board_name=" + boardName + "&stamp_id=" + stampId;
+    }
+}
+
+function enableCountMode(url) {
+    window.location.href = url;
 }
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">

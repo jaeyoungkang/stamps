@@ -8,24 +8,26 @@ router.register('stamps', api.StampViewSet)
 
 app_name = 'stamps'
 urlpatterns = [
-    path('main/<page_index>', views.MainView.as_view(), name='main'),
-    path('edit/<page_index>', views.EditView.as_view(), name='edit'),
-    path('trash', views.TrashView.as_view(), name='trash'),
+    path('main/<board_name>', views.MainView.as_view(), name='main'),
+    path('edit/<board_name>', views.EditView.as_view(), name='edit'),
     path('history', views.HistoryView.as_view(), name='history'),
     path('stat/<period>', views.StatView.as_view(), name='stat'),
 
     path('<clog_id>/onlog', views.on_clog, name='onlog'),
     path('<clog_id>/offlog', views.off_clog, name='offlog'),
+
     path('add', views.add_counter, name='add'),
+    path('make_board', views.make_board, name='make_board'),
+    path('remove_board', views.remove_board, name='remove_board'),
+
     path('api/', include(router.urls)),
 
-    path('count/<page_number>/<stamp_id>', views.count, name='count'),
-    path('discard/<page_number>/<stamp_id>', views.discard, name='discard'),
-    path('restore/<stamp_id>', views.restore, name='restore'),
-
-    path('empty', views.empty_trash, name='empty'),
+    path('count/<board_name>/<stamp_id>', views.count, name='count'),
+    path('remove/<stamp_id>', views.remove, name='remove'),
 
     path('search', views.search, name='search'),
 
     path('filter', views.filter, name='filter'),
+
+    path('move', views.move, name='move'),
 ]

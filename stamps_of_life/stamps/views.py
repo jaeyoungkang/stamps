@@ -19,14 +19,6 @@ def get_trash_all():
 def get_clog_all():
     return CLog.objects.exclude(stamp__board__name="trash").order_by('-stamped_at').all()
 
-class TrashView(generic.ListView):
-    template_name = 'stamps/trash.html'
-    context_object_name = 'stamp_list'
-
-    def get_queryset(self):
-
-        return get_trash_all()
-
 class MainView(generic.ListView):
     template_name = 'stamps/index.html'
     context_object_name = 'stamp_list'
@@ -37,15 +29,29 @@ class MainView(generic.ListView):
         if board_count == 0 :
             b = Board(name="1")
             b.save()
-            board_count = Board.objects.count()
 
-        context['page_count'] = range(1, board_count)
-        context['page_number'] = int(self.kwargs['page_index'])
+        context['board_list'] = Board.objects.all()
+        context['board_name'] = self.kwargs['board_name']
         return context
 
     def get_queryset(self):
-        page_number = self.kwargs['page_index']
-        return get_stamp_all(page_number)
+        board_name = self.kwargs['board_name']
+        return get_stamp_all(board_name)
+
+
+class EditView(generic.ListView):
+    template_name = 'stamps/edit.html'
+    context_object_name = 'stamp_list'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['board_list'] = Board.objects.all()
+        context['board_name'] = self.kwargs['board_name']
+        return context
+
+    def get_queryset(self):
+        board_name = self.kwargs['board_name']
+        return get_stamp_all(board_name)
 
 
 class HistoryView(generic.ListView):
@@ -99,11 +105,11 @@ def update_count(stamp):
     stamp.updated_at = datetime.now()
     stamp.save()
 
-def count(request, page_number, stamp_id):
+def count(request, baord_name, stamp_id):
     s = get_object_or_404(Stamp, id=stamp_id)
     s.clog_set.create()
     update_count(s)
-    return redirect('stamps:main', page_number)
+    return redirect('stamps:main', baord_name)
 
 def on_clog(request, clog_id):
     clog = get_object_or_404(CLog, id=clog_id)
@@ -119,57 +125,68 @@ def off_clog(request, clog_id):
     update_count(clog.stamp)
     return redirect('stamps:history')
 
+def remove_board(request):
+    board_name = request.GET['query']
+
+    if board_name == "1":
+        return redirect('stamps:main', board_name)
+    if board_name == "trash":
+        return redirect('stamps:main', board_name)
+
+    b = Board.objects.get(name=board_name)
+    if b :
+        trash = Board.objects.get(name="trash")
+        for s in b.stamp_set.all():
+            s.board = trash
+            s.save()
+        b.delete()
+        return redirect('stamps:main', "trash")
+
+    return redirect('stamps:main', board_name)
+
+def make_board(request):
+    board_name = request.GET['query']
+
+    if Board.objects.filter(name=board_name).exists():
+        return redirect('stamps:main', 1)
+
+    b = Board(name=board_name)
+    b.save()
+    return redirect('stamps:main', board_name)
+
 def add_counter(request):
     stamp_name = request.GET['query']
-    page_number = request.GET['page_number']
+    board_name = request.GET['board_name']
     if Stamp.objects.filter(name=stamp_name).exists():
-        return redirect('stamps:main', page_number)
+        return redirect('stamps:main', board_name)
     s = Stamp(name=stamp_name)
-    s.board = Board.objects.get(name="1")
+    s.board = Board.objects.get(name=board_name)
     s.save()
-    return redirect('stamps:main', page_number)
-
-class EditView(generic.ListView):
-    template_name = 'stamps/edit.html'
-    context_object_name = 'stamp_list'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_count'] = range(1, Board.objects.count())
-        context['page_number'] = int(self.kwargs['page_index'])
-        return context
-
-    def get_queryset(self):
-        page_number = self.kwargs['page_index']
-        return get_stamp_all(page_number)
+    return redirect('stamps:main', board_name)
 
 def get_trash_board():
     return Board.objects.filter(name="trash").get()
 
-def discard(request, page_number, stamp_id):
-    s = Stamp.objects.filter(id=stamp_id).get()
-    if s:
-        s.board = get_trash_board()
-        s.save()
-
-    return redirect('stamps:edit', page_number)
-
-def empty_trash(request):
-    Stamp.objects.filter(board__name="trash").delete()
-    return redirect('stamps:trash')
-
-def restore(request, stamp_id):
-    s = Stamp.objects.get(id=stamp_id)
-    s.board = Board.objects.exclude(name="trash").get()
-    s.save()
-    return redirect('stamps:trash')
+def remove(request, stamp_id):
+    Stamp.objects.filter(id=stamp_id).delete()
+    return redirect('stamps:main', "trash")
 
 def search(request):
     keyword = request.GET['query']
     stamps = Stamp.objects.exclude(board__name='trash').filter(name__contains=keyword).all()
-    return render(request, "stamps/search.html", {"stamp_list":stamps})
+    return render(request, "stamps/search.html", {"stamp_list":stamps, "board_list":Board.objects.all(), "board_name":""})
 
 def filter(request):
     keyword = request.GET['query']
     logs = CLog.objects.filter(stamp__name__contains=keyword).order_by('-stamped_at').all()
     return render(request, "stamps/history.html", {"clog_list":logs})
+
+def move(request):
+    stamp_id = request.GET['stamp_id']
+    board_name = request.GET['board_name']
+    s = Stamp.objects.get(id=stamp_id)
+    b = Board.objects.get(name=board_name)
+    if s and b:
+        s.board = b
+        s.save()
+    return redirect('stamps:edit', "1")
