@@ -6,7 +6,10 @@ import operator
 from .models import Stamp, CLog, Board
 
 def get_stamp_all(board_name):
-    return Stamp.objects.filter(board__name=board_name).order_by('-updated_at').all()
+    if board_name == "all":
+        return Stamp.objects.exclude(board__name='trash').order_by('-updated_at').all()
+    else:
+        return Stamp.objects.filter(board__name=board_name).order_by('-updated_at').all()
 
 def get_trash_all():
     if Board.objects.filter(name="trash").exists() != True:
@@ -36,10 +39,9 @@ class MainView(generic.ListView):
         context = super().get_context_data(**kwargs)
         board_count =  Board.objects.count()
         if board_count == 0 :
-            b = Board(name="1")
-            b.save()
+            make_basic_board()
 
-        context['board_list'] = Board.objects.all()
+        context['board_list'] = get_ordered_board_names()
         context['board_name'] = self.kwargs['board_name']
         return context
 
@@ -47,6 +49,22 @@ class MainView(generic.ListView):
         board_name = self.kwargs['board_name']
         return get_stamp_all(board_name)
 
+def make_basic_board():
+    b = Board(name="all")
+    b.save()
+    b = Board(name="trash")
+    b.save()
+
+def get_ordered_board_names():
+    all = Board.objects.get(name="all")
+    trash = Board.objects.get(name="trash")
+    board_list = Board.objects.exclude(name="all").exclude(name="trash").all()
+    board_names = []
+    for board in board_list:
+        board_names.append(board.name)
+    board_names.insert(0, all.name)
+    board_names.insert(0, trash.name)
+    return board_names
 
 class EditView(generic.ListView):
     template_name = 'stamps/edit.html'
@@ -150,7 +168,7 @@ def off_clog(request, clog_id):
 def remove_board(request):
     board_name = request.GET['query']
 
-    if board_name == "1":
+    if board_name == "all":
         return redirect('stamps:main', board_name)
     if board_name == "trash":
         return redirect('stamps:main', board_name)
