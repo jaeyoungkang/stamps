@@ -75,7 +75,7 @@ function changeBoard(url) {
 }
 
 function removeBoard(url) {
-    var keyword = prompt("Type board name", "")
+    var keyword = prompt("Type board name (You don't remove 'trash' and 'all' group)", "")
 
     if(keyword != null && keyword != "") {
         window.location.href = url + "?query=" + keyword;
@@ -83,7 +83,7 @@ function removeBoard(url) {
 }
 
 function makeBoard(url) {
-    var keyword = prompt("Type board name", "")
+    var keyword = prompt("Type board name ", "")
 
     if(keyword != null && keyword != "") {
         window.location.href = url + "?query=" + keyword;
