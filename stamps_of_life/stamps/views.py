@@ -72,7 +72,7 @@ class EditView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['board_list'] = Board.objects.all()
+        context['board_list'] = get_ordered_board_names()
         context['board_name'] = self.kwargs['board_name']
         return context
 
@@ -214,7 +214,7 @@ def remove(request, stamp_id):
 def search(request):
     keyword = request.GET['query']
     stamps = Stamp.objects.exclude(board__name='trash').filter(name__contains=keyword).all()
-    return render(request, "stamps/search.html", {"stamp_list":stamps, "board_list":Board.objects.all(), "board_name":""})
+    return render(request, "stamps/search.html", {"stamp_list":stamps, "board_list":get_ordered_board_names(), "board_name":""})
 
 def filter(request):
     keyword = request.GET['query']

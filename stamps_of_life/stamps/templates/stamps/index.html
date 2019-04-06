@@ -16,7 +16,15 @@
 <div class="row text-center">
     <div class="col">
     {% for name in board_list %}
-        {% if name == "all" or name == "trash" %}
+        {% if name == "trash" %}
+            {% if name == board_name %}
+            <button class="btn-success btn-sm" type="button" onclick="changeBoard('{% url 'stamps:main' name %}')"><span class="glyphicon glyphicon-trash"></span> </button>
+            {% else %}
+            <button class="btn-outline-success btn-sm" type="button" onclick="changeBoard('{% url 'stamps:main' name %}')"><span class="glyphicon glyphicon-trash"></span> </button>
+            {% endif %}
+        {% endif %}
+
+        {% if name == "all" %}
             {% if name == board_name %}
             <input class="btn-success btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
             {% else %}
@@ -62,7 +70,7 @@
     <br>
 </div>
 <script>
-    function changeBoard(url) {
+function changeBoard(url) {
     window.location.href = url;
 }
 

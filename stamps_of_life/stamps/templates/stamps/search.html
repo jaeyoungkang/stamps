@@ -13,15 +13,37 @@
 <br>
 <div class="row text-center">
     <div class="col">
-    <input class="btn-secondary btn-sm" type="button" value="-" onclick="removeBoard('{% url 'stamps:remove_board' %}')">
-    {% for board in board_list %}
-        {% if board.name == board_name %}
-        <input class="btn-primary btn-sm" type="button" value="{{ board.name }}" onclick="changeBoard('{% url 'stamps:main' board.name %}')">
-        {% else %}
-        <input class="btn-secondary btn-sm" type="button" value="{{ board.name }}" onclick="changeBoard('{% url 'stamps:main' board.name %}')">
+
+    {% for name in board_list %}
+        {% if name == "trash" %}
+            {% if name == board_name %}
+            <button class="btn-success btn-sm" type="button" onclick="changeBoard('{% url 'stamps:main' name %}')"><span class="glyphicon glyphicon-trash"></span> </button>
+            {% else %}
+            <button class="btn-outline-success btn-sm" type="button" onclick="changeBoard('{% url 'stamps:main' name %}')"><span class="glyphicon glyphicon-trash"></span> </button>
+            {% endif %}
+        {% endif %}
+
+        {% if name == "all" %}
+            {% if name == board_name %}
+            <input class="btn-success btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
+            {% else %}
+            <input class="btn-outline-success btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
+            {% endif %}
         {% endif %}
     {% endfor %}
-    <input class="btn-secondary btn-sm" type="button" value="+" onclick="makeBoard('{% url 'stamps:make_board' %}')">
+
+    <button class="btn-outline-success btn-sm" type="button" onclick="removeBoard('{% url 'stamps:remove_board' %}')"> <span class="glyphicon glyphicon-minus"></span> </button>
+    <button class="btn-outline-success btn-sm" type="button" onclick="makeBoard('{% url 'stamps:make_board' %}')"> <span class="glyphicon glyphicon-plus"></span> </button>
+
+    {% for name in board_list %}
+        {% if name != "all" and name != "trash" %}
+            {% if name == board_name %}
+            <input class="btn-primary btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
+            {% else %}
+            <input class="btn-secondary btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
+            {% endif %}
+        {% endif %}
+    {% endfor %}
     </div>
 </div>
 <br>
