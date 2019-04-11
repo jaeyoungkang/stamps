@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
+AUTH_USER_MODEL = 'stamps.User'
 INSTALLED_APPS = [
     'rest_framework',
     'stamps.apps.StampsConfig',
@@ -80,7 +80,7 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'stamps_of_life',
+        'NAME': 'CE',
         'USER': 'root',
         'PASSWORD': '1234qwer',
         'HOST': '127.0.0.1',

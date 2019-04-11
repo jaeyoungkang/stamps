@@ -30,4 +30,9 @@ urlpatterns = [
     path('filter', views.filter, name='filter'),
 
     path('move', views.move, name='move'),
+
+    path('join', views.signup, name='join'),
+    path('login', views.signin, name='login'),
+
+    path('load', views.load_datas, name='load'),
 ]
