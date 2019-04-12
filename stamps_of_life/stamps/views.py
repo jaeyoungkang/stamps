@@ -37,7 +37,17 @@ class MainView(generic.ListView):
     template_name = 'stamps/index.html'
     context_object_name = 'stamp_list'
 
+    def dispatch(self, request, *args, **kwargs):
+
+        if self.request.user.is_anonymous:
+            return redirect('stamps:login')
+        else:
+            return super(MainView, self).dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
+        if self.request.user.is_anonymous:
+            pass
+
         context = super().get_context_data(**kwargs)
         board_count = my_boards(self.request.user).count()
         if board_count == 0 :
@@ -48,6 +58,9 @@ class MainView(generic.ListView):
         return context
 
     def get_queryset(self):
+        if self.request.user.is_anonymous:
+            pass
+
         board_name = self.kwargs['board_name']
         return get_stamp_all(self.request.user, board_name)
 
@@ -260,95 +273,5 @@ def signin(request):
     else:
         form = LoginForm()
         return render(request, 'stamps/login.html', {'form': form})
-
-def load_board():
-    u = User.objects.get(email="jaeyoung2010@gmail.com")
-    f = open("baord.txt", "r")
-    result = f.read()
-    f.close()
-    datas = result.split("\n")
-    for i in datas:
-        if i == '':
-            continue
-        b = Board(name=i)
-        b.user = u
-        b.save()
-    return datas
-
-def get_string_to_datetime(date_str):
-    date = None
-    if date_str != ' ':
-        date = datetime.strptime(date_str, '%Y-%m-%d_%H:%M:%S')
-    return date
-
-def get_board(board_name):
-    u = User.objects.get(email="jaeyoung2010@gmail.com")
-    if board_name != '':
-        if Board.objects.filter(user=u).filter(name=board_name).exists() == False:
-            b = Board(name=board_name)
-            b.user = u
-            b.save()
-            return b
-        else:
-            return Board.objects.filter(user=u).get(name=board_name)
-    else:
-        return None
-
-def get_stamp(stamp_name):
-    u = User.objects.get(email="jaeyoung2010@gmail.com")
-    if Stamp.objects.filter(user=u).filter(name=stamp_name).exists():
-        return Stamp.objects.filter(user=u).get(name=stamp_name)
-
-    return None
-
-
-
-def load_stamp():
-    u = User.objects.get(email="jaeyoung2010@gmail.com")
-    f = open("stamp.txt", "r")
-    result = f.read()
-    f.close()
-    datas = result.split("\n")
-    for i in datas:
-        row = i.split(", ")
-        if len(row) < 5:
-            break
-        s = Stamp(name=row[0])
-        b = get_board(row[1])
-        s.board = b
-        s.created_at = get_string_to_datetime(row[2])
-        s.updated_at = get_string_to_datetime(row[3])
-        s.count = int(row[4])
-        s.user = u
-        s.save()
-    return datas
-
-def load_log():
-    u = User.objects.get(email="jaeyoung2010@gmail.com")
-    f = open("log.txt", "r")
-    result = f.read()
-    f.close()
-    datas = result.split("\n")
-    for i in datas:
-        row = i.split(", ")
-        if len(row) < 3:
-            break
-        if get_stamp(row[0]) is None:
-            break
-
-        l = CLog()
-        l.user = u
-        l.stamp = get_stamp(row[0])
-        l.stamped_at = get_string_to_datetime(row[1])
-        l.is_active = row[2] == 'True' and True or False
-        l.save()
-    return datas
-
-def load_datas(reuqest):
-    load_board()
-    load_stamp()
-    load_log()
-    return HttpResponse("Load complete!")
-
 
 

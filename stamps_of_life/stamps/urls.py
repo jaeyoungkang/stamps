@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework import routers
 from . import api
 from . import views
+from django.contrib.auth import views as auth_views
 
 router = routers.DefaultRouter()
 router.register('stamps', api.StampViewSet)
@@ -33,6 +34,6 @@ urlpatterns = [
 
     path('join', views.signup, name='join'),
     path('login', views.signin, name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
-    path('load', views.load_datas, name='load'),
 ]
