@@ -249,6 +249,7 @@ def move(request):
     b = Board.objects.get(name=board_name)
     if s and b:
         s.board = b
+        s.updated_at = datetime.now()
         s.save()
     return redirect('stamps:edit', "1")
 

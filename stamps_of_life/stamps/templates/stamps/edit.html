@@ -82,8 +82,8 @@ function makeBoard(url) {
 
 function move(stampId) {
     var board_list = [
-    {% for board in board_list %}
-        '{{ board.name }}',
+    {% for name in board_list %}
+        '{{ name }}',
     {% endfor %}
     ];
 
