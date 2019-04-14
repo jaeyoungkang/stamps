@@ -60,6 +60,12 @@
 </div>
 
 <script>
+document.addEventListener('keydown', function(event) {
+    if(event.code == 'Enter') {
+        search('{% url 'stamps:search' %}');
+    }
+});
+
 function search(url) {
     var keyword = document.getElementById("filtering_keyword").value
 
