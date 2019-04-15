@@ -232,7 +232,7 @@ def search(request):
     keyword = request.GET['query']
     if keyword[0] == '@':
         keyword = keyword[1:]
-        stamps = my_stamps(request.user).filter(board__name__contains=keyword).all()
+        return redirect('stamps:main', keyword)
     else:
         stamps = my_stamps(request.user).exclude(board__name='trash').filter(name__contains=keyword).all()
     return render(request, "stamps/search.html", {"stamp_list":stamps, "board_list":get_ordered_board_names(request.user), "board_name":""})
