@@ -66,6 +66,7 @@ class Stamp(models.Model):
     count = models.IntegerField(default=0)
     board = models.ForeignKey(Board, on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    type = models.CharField(max_length=32, default='normal')
     def __str__(self):
         return self.name
 

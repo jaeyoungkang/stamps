@@ -12,8 +12,8 @@
         <input class="btn" type="button" value="search" onclick="search('{% url 'stamps:search' %}')"  >
   </div>
 </div>
-<br>
-<div class="row text-center">
+
+<div class="row text-center" style="margin:10px">
     <div class="col">
     {% for name in board_list %}
         {% if name == "trash" %}
@@ -31,13 +31,25 @@
             <input class="btn-outline-success btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
             {% endif %}
         {% endif %}
+
+        {% if name == "stats" %}
+            {% if name == board_name %}
+            <input class="btn-success btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
+            {% else %}
+            <input class="btn-outline-success btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
+            {% endif %}
+        {% endif %}
     {% endfor %}
 
     <button class="btn-outline-success btn-sm" type="button" onclick="removeBoard('{% url 'stamps:remove_board' %}')"> <span class="glyphicon glyphicon-minus"></span> </button>
     <button class="btn-outline-success btn-sm" type="button" onclick="makeBoard('{% url 'stamps:make_board' %}')"> <span class="glyphicon glyphicon-plus"></span> </button>
+    </div>
+</div>
 
+<div class="row text-center" >
+    <div class="col">
     {% for name in board_list %}
-        {% if name != "all" and name != "trash" %}
+        {% if name != "all" and name != "trash" and name != "stats" %}
             {% if name == board_name %}
             <input class="btn-primary btn-sm" type="button" value="{{ name }}" onclick="changeBoard('{% url 'stamps:main' name %}')">
             {% else %}
@@ -50,18 +62,24 @@
 <br>
 <div class="container">
     <div class="row text-center">
-        {% if board_name != "trash" %}
+        {% if board_name != "trash" and board_name != "stats" %}
         <div class="col-lg-2 col-md-4 col-sm-4 mb-4 col-xs-4">
-            <input class="button btn-secondary btn-lg" type="submit" value="+"b onclick="popup( {{ stamp_list|length}}, '{{board_name}}' )">
+            <input class="button btn-secondary btn-lg" type="submit" value="+" onclick="popup( {{ stamp_list|length}}, '{{board_name}}' )">
             <p> New Counter </p>
         </div>
         {% endif %}
+
+
         {% for stamp in stamp_list %}
         <div class="col-lg-2 col-md-4 col-sm-4 mb-4 col-xs-4">
-            {% if board_name != "trash" %}
-            <input class="button btn-primary btn-lg" type="submit" value="{{ stamp.count }}" onclick="count('{% url 'stamps:count' board_name stamp.id  %}')">
+            {% if board_name == "stats" %}
+            <input class="button btn-outline-success btn-lg" type="submit" value="{{ stamp.count }}">
             {% else %}
-            <input class="button btn-secondary btn-lg" type="submit" value="{{ stamp.count }}" onclick="remove('{% url 'stamps:remove' stamp.id  %}')">
+                {% if board_name != "trash" %}
+                <input class="button btn-primary btn-lg" type="submit" value="{{ stamp.count }}" onclick="count('{% url 'stamps:count' board_name stamp.id  %}')">
+                {% else %}
+                <input class="button btn-secondary btn-lg" type="submit" value="{{ stamp.count }}" onclick="remove('{% url 'stamps:remove' stamp.id  %}')">
+                {% endif %}
             {% endif %}
             <p> {{ stamp.name }} </p>
         </div>

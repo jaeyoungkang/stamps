@@ -1,6 +1,6 @@
 from django.contrib.auth import login, authenticate
 from django.http import HttpResponse
-
+from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 from datetime import datetime, timedelta
@@ -13,13 +13,19 @@ def my_boards(user):
     return Board.objects.filter(user=user).all()
 
 def my_stamps(user):
-    return Stamp.objects.filter(user=user).all()
+    return Stamp.objects.exclude(type='super').filter(user=user).all()
 
-def get_stamp_all(user, board_name):
+def my_super_stamps(user):
+    return Stamp.objects.filter(type='super').filter(user=user).all()
+
+def get_stamp_all(user, board_name, order = '-updated_at'):
     if board_name == "all":
-        return my_stamps(user).exclude(board__name='trash').order_by('-updated_at').all()
+        return my_stamps(user).exclude(board__name='trash').order_by(order).all()
+    elif board_name == "stats":
+        return my_super_stamps(user).exclude(board__name='trash').order_by(order).all()
     else:
-        return my_stamps(user).filter(board__name=board_name).order_by('-updated_at').all()
+        return my_stamps(user).filter(board__name=board_name).order_by(order).all()
+
 
 def get_clog_list(user, length, keyword):
     log_list = CLog.objects.filter(user=user).exclude(stamp__board__name="trash").order_by('-stamped_at').all()
@@ -48,13 +54,19 @@ class MainView(generic.ListView):
         if self.request.user.is_anonymous:
             pass
 
-        context = super().get_context_data(**kwargs)
-        board_count = my_boards(self.request.user).count()
-        if board_count == 0 :
-            make_basic_board(self.request.user)
+        board_name = self.kwargs['board_name']
+        user = self.request.user
 
-        context['board_list'] = get_ordered_board_names(self.request.user)
-        context['board_name'] = self.kwargs['board_name']
+        context = super().get_context_data(**kwargs)
+        board_count = my_boards(user).count()
+        if board_count == 0 :
+            make_basic_board(user)
+
+        if board_name == 'stats':
+            setup_stat_board(user)
+
+        context['board_list'] = get_ordered_board_names(user)
+        context['board_name'] = board_name
         return context
 
     def get_queryset(self):
@@ -62,7 +74,29 @@ class MainView(generic.ListView):
             pass
 
         board_name = self.kwargs['board_name']
-        return get_stamp_all(self.request.user, board_name)
+        if board_name == 'stats':
+            return get_stamp_all(self.request.user, board_name, '-count')
+        else:
+            return get_stamp_all(self.request.user, board_name)
+
+
+def setup_stat_board(user):
+    stamps = my_super_stamps(user)
+    for s in stamps:
+        if my_boards(user).filter(name=s.board.name).exists() == False:
+            s.delete()
+
+    boards = my_boards(user).exclude(name='stats').all()
+    for b in boards:
+        if my_super_stamps(user).filter(name=b.name).exists() == False:
+            make_counter(b.name, 'stats', user, 'super')
+        c = my_super_stamps(user).get(name=b.name)
+        count = get_stamp_all(user, b.name).aggregate(Sum('count'))['count__sum']
+        if count == None:
+            count = 0
+        c.count = count
+        c.save()
+
 
 def make_basic_board(user):
     b = Board(name="all")
@@ -71,16 +105,20 @@ def make_basic_board(user):
     b = Board(name="trash")
     b.user = user
     b.save()
+    b = Board(name="stats")
+    b.user = user
+    b.save()
 
 def get_ordered_board_names(user):
-    all = my_boards(user).get(name="all")
-    trash = my_boards(user).get(name="trash")
-    board_list = my_boards(user).exclude(name="all").exclude(name="trash").all()
+    board_list = my_boards(user).exclude(name="all").exclude(name="trash").exclude(name="stats").all()
     board_names = []
     for board in board_list:
         board_names.append(board.name)
-    board_names.insert(0, all.name)
-    board_names.insert(0, trash.name)
+
+    board_names.insert(0, 'stats')
+    board_names.insert(0, 'all')
+    board_names.insert(0, 'trash')
+
     return board_names
 
 class EditView(generic.ListView):
@@ -212,15 +250,20 @@ def make_board(request):
     b.save()
     return redirect('stamps:main', board_name)
 
+def make_counter(stamp_name, board_name, user, type='normal'):
+    if my_stamps(user).filter(name=stamp_name).exists():
+        return redirect('stamps:main', board_name)
+    s = Stamp(name=stamp_name)
+    s.board = my_boards(user).get(name=board_name)
+    s.user = user
+    s.type = type
+    s.save()
+
 def add_counter(request):
     stamp_name = request.GET['query']
     board_name = request.GET['board_name']
-    if my_stamps(request.user).filter(name=stamp_name).exists():
-        return redirect('stamps:main', board_name)
-    s = Stamp(name=stamp_name)
-    s.board = my_boards(request.user).get(name=board_name)
-    s.user = request.user
-    s.save()
+    make_counter(stamp_name, board_name, request.user)
+
     return redirect('stamps:main', board_name)
 
 
