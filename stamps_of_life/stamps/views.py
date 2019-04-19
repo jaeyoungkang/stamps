@@ -143,8 +143,8 @@ class HistoryView(generic.ListView):
     def get_queryset(self):
         return get_clog_list(self.request.user, 100, "")
 
-def make_range(period):
-    today = datetime.now() + timedelta(days=1)
+def make_range(period, end):
+    today = datetime.now() + timedelta(days=end)
     startday = today - timedelta(days=period)
 
     start = startday.strftime("%Y-%m-%d")
@@ -159,7 +159,7 @@ class StatView(generic.ListView):
     def get_context_data(self, **kwargs):
         period = int(self.request.GET['period'])
         type = self.request.GET['type']
-        range = make_range(period)
+        range = make_range(period, 1)
 
         context = super().get_context_data(**kwargs)
         context['start_day'] = range[0]
@@ -170,10 +170,20 @@ class StatView(generic.ListView):
 
     def get_queryset(self):
         period = int(self.request.GET['period'])
-        range = make_range(period)
+        range = make_range(period, 1)
+        if period == 1:
+            range2 = make_range(period, 0)
+        elif period == 7:
+            range2 = make_range(period, -6)
+        elif period == 28:
+            range2 = make_range(period, -27)
+
+        logs2 = CLog.objects.filter(user=self.request.user).filter(stamped_at__range=range2).filter(
+            is_active=True).all()
 
         logs = CLog.objects.filter(user=self.request.user).filter(stamped_at__range=range).filter(is_active=True).all()
         total_count = logs.count()
+        total_count2 = logs2.count()
         result = []
 
         type = self.request.GET['type']
@@ -182,15 +192,19 @@ class StatView(generic.ListView):
             for name in board_names:
                 n = name['stamp__board__name']
                 c = logs.filter(stamp__board__name=n).count()
-                r = round(c/total_count * 100, 1)
-                result.append({"name": n, "count": c, "rate":r})
+                c2 = logs2.filter(stamp__board__name=n).count()
+                r = 0 if total_count == 0 else round(c / total_count * 100, 1)
+                r2 = 0 if total_count2 == 0 else round(c2 / total_count2 * 100, 1)
+                result.append({"name": n, "count": c, "count2": c2, "rate":r, "rate2":r2})
         else:
             names = logs.values("stamp__name").distinct()
             for name in names:
                 n = name['stamp__name']
                 c = logs.filter(stamp__name=n).count()
-                r = round(c/total_count * 100, 1)
-                result.append({"name": n, "count": c, "rate":r})
+                c2 = logs2.filter(stamp__name=n).count()
+                r = 0 if total_count == 0 else round(c / total_count * 100, 1)
+                r2 = 0 if total_count2 == 0 else round(c2/total_count2 * 100, 1)
+                result.append({"name": n, "count": c, "count2": c2, "rate":r, "rate2":r2})
 
         result.sort(key=operator.itemgetter('count'), reverse=True)
         return result

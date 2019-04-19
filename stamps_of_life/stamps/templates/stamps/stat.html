@@ -23,7 +23,7 @@
             {% else %}
             <th scope="col-6">Counter</th>
             {% endif %}
-            <th scope="col-3">Times</th>
+            <th scope="col-3">Times Cur(Prev)</th>
             <th scope="col-3">Rate</th>
         </tr>
       </thead>
@@ -32,8 +32,8 @@
       {% for d in stats %}
       <tr>
           <td> {{ d.name }} </td>
-          <td> {{ d.count }} </td>
-          <td> {{ d.rate }} % </td>
+          <td> {{ d.count }} ( {{ d.count2 }} ) </td>
+          <td> {{ d.rate }}% ( {{ d.rate2}}% ) </td>
       </tr>
       {% endfor %}
       </tbody>
