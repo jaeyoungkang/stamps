@@ -282,7 +282,7 @@ def search(request):
 
 def filter(request):
     keyword = request.GET['query']
-    logs = get_clog_list(100, keyword)
+    logs = get_clog_list(request.user, 100, keyword)
     return render(request, "stamps/history.html", {"clog_list":logs})
 
 def move(request):
