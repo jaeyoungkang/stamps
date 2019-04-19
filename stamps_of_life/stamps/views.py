@@ -160,10 +160,20 @@ class StatView(generic.ListView):
         period = int(self.request.GET['period'])
         type = self.request.GET['type']
         range = make_range(period, 1)
+        if period == 1:
+            range2 = make_range(period, 0)
+        elif period == 7:
+            range2 = make_range(period, -6)
+        elif period == 28:
+            range2 = make_range(period, -27)
 
         context = super().get_context_data(**kwargs)
         context['start_day'] = range[0]
         context['end_day'] = range[1]
+
+        context['start_day2'] = range2[0]
+        context['end_day2'] = range2[1]
+
         context['period'] = period
         context['type'] = type
         return context
