@@ -346,4 +346,9 @@ def signin(request):
         form = LoginForm()
         return render(request, 'stamps/login.html', {'form': form})
 
+from django.http import JsonResponse
+
+def datas(request):
+    return JsonResponse(dict(data="test!!"))
+
 
