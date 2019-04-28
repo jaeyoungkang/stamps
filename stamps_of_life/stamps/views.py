@@ -31,7 +31,11 @@ def get_clog_list(user, length, keyword):
     log_list = CLog.objects.filter(user=user).exclude(stamp__board__name="trash").order_by('-stamped_at').all()
 
     if keyword != "":
-        log_list = log_list.filter(stamp__name__contains=keyword)
+        if keyword[0] == '@':
+            keyword = keyword[1:]
+            log_list = log_list.filter(stamp__board__name__contains=keyword)
+        else:
+            log_list = log_list.filter(stamp__name__contains=keyword)
 
     count = log_list.count()
     if count < length:

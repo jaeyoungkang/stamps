@@ -45,9 +45,15 @@
 </div>
 
 <script>
-  function setFilter(url) {
-    window.location.href = url + "?query=" + document.getElementById("filtering_keyword").value
-  }
+    document.addEventListener('keydown', function(event) {
+        if(event.code == 'Enter') {
+            setFilter('{% url 'stamps:filter' %}');
+        }
+    });
+
+    function setFilter(url) {
+        window.location.href = url + "?query=" + document.getElementById("filtering_keyword").value
+    }
 
 </script>
 {% endblock %}
