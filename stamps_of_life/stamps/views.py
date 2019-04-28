@@ -350,9 +350,13 @@ def signin(request):
         form = LoginForm()
         return render(request, 'stamps/login.html', {'form': form})
 
-from django.http import JsonResponse
+from django.core import serializers
+
 
 def datas(request):
-    return JsonResponse(dict(data="test!!"))
+    data = Stamp.objects.exclude(type='super').filter(board__name='1').all()
+    response = serializers.serialize("json", data)
+    return HttpResponse(response, content_type='application/json')
+
 
 
